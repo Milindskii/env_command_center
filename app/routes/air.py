@@ -9,7 +9,6 @@ Endpoints
     GET  /environment/air/history  — paginated AQI history
 """
 
-from __future__ import annotations
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from sqlalchemy import select

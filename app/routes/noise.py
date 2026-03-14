@@ -9,7 +9,6 @@ Endpoints
     GET  /environment/noise/history  — paginated noise history
 """
 
-from __future__ import annotations
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from sqlalchemy import select

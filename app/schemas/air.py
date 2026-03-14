@@ -8,7 +8,6 @@ Schemas
     AirDataRead    — shape returned by GET endpoints
 """
 
-from __future__ import annotations
 
 from datetime import datetime
 

@@ -10,7 +10,6 @@ Responsibilities:
     • Mounts air-quality and noise-pollution routers.
 """
 
-from __future__ import annotations
 
 import logging
 from contextlib import asynccontextmanager

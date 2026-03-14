@@ -4,7 +4,6 @@ routes/analytics.py
 FastAPI router for aggregated pollution analytics and alerts.
 """
 
-from __future__ import annotations
 
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.ext.asyncio import AsyncSession
