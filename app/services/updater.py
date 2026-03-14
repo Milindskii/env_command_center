@@ -12,6 +12,9 @@ Called by the scheduler every 10 minutes to:
 from __future__ import annotations
 
 import logging
+from datetime import datetime, timedelta
+
+from sqlalchemy import delete
 
 from app.core.config import settings
 from app.db.session import AsyncSessionLocal
@@ -74,3 +77,30 @@ async def update_all_environmental_data() -> None:
 
         await session.commit()
         logger.info("Updater cycle complete — committed all records.")
+
+
+async def prune_old_data(days: int = 30) -> None:
+    """Delete raw environment records older than the specified number of days."""
+    cutoff = datetime.now() - timedelta(days=days)
+    logger.info("Pruning environment data older than %s days (cutoff: %s)", days, cutoff)
+
+    async with AsyncSessionLocal() as session:
+        # AirData
+        stmt_air = delete(AirData).where(AirData.timestamp < cutoff)
+        result_air = await session.execute(stmt_air)
+
+        # NoiseData
+        stmt_noise = delete(NoiseData).where(NoiseData.timestamp < cutoff)
+        result_noise = await session.execute(stmt_noise)
+
+        # SoundData
+        stmt_sound = delete(SoundData).where(SoundData.timestamp < cutoff)
+        result_sound = await session.execute(stmt_sound)
+
+        await session.commit()
+        logger.info(
+            "Pruning complete. Deleted Air: %d, Noise: %d, Sound: %d",
+            result_air.rowcount,
+            result_noise.rowcount,
+            result_sound.rowcount,
+        )

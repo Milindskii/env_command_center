@@ -23,11 +23,11 @@ class Settings(BaseSettings):
 
     # ── Database ────────────────────────────────────────────────────────
     DATABASE_URL: str = (
-        "postgresql+asyncpg://postgres:password@localhost:5432/env_command_center"
+        "postgresql+asyncpg://postgres:milind7841@localhost:5432/env_command_center"
     )
 
     # ── External APIs ───────────────────────────────────────────────────
-    AQI_API_KEY: str = "your_api_key_here"
+    AQI_API_KEY: str = "e5f80640f2cc88a05191fc2dfbcd2dd3667c6faf"
 
     # ── Monitoring targets ──────────────────────────────────────────────
     MONITOR_CITIES: str = "delhi,mumbai,bangalore,chennai,kolkata"

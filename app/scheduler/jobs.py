@@ -15,7 +15,7 @@ import logging
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.interval import IntervalTrigger
 
-from app.services.updater import update_all_environmental_data
+from app.services.updater import update_all_environmental_data, prune_old_data
 
 logger = logging.getLogger(__name__)
 
@@ -26,6 +26,12 @@ def _run_updater() -> None:
     """Bridge sync APScheduler callback → async updater coroutine."""
     loop = asyncio.get_event_loop()
     loop.create_task(update_all_environmental_data())
+
+
+def _run_pruner() -> None:
+    """Bridge sync APScheduler callback → async pruner coroutine."""
+    loop = asyncio.get_event_loop()
+    loop.create_task(prune_old_data())
 
 
 def start_scheduler() -> None:
@@ -40,8 +46,15 @@ def start_scheduler() -> None:
         name="Fetch & store environment data",
         replace_existing=True,
     )
+    scheduler.add_job(
+        _run_pruner,
+        trigger=IntervalTrigger(days=1),
+        id="env_data_pruner",
+        name="Prune old environment data",
+        replace_existing=True,
+    )
     scheduler.start()
-    logger.info("Scheduler started — environment data will refresh every 10 minutes.")
+    logger.info("Scheduler started — fetch runs every 10 min, prune runs daily.")
 
 
 def stop_scheduler() -> None:

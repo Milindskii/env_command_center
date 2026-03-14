@@ -18,18 +18,23 @@ from collections.abc import AsyncIterator
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
 
 from app.db.base import Base
 from app.db.session import async_engine
 from app.routes.air import router as air_router
 from app.routes.noise import router as noise_router
 from app.routes.sound import router as sound_router
+from app.routes.analytics import router as analytics_router
 from app.scheduler.jobs import start_scheduler, stop_scheduler
 
 # ── Logging ─────────────────────────────────────────────────────────────
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s | %(levelname)-8s | %(name)s | %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S",
 )
 logger = logging.getLogger(__name__)
 
@@ -82,6 +87,11 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+# ── Rate Limiting ───────────────────────────────────────────────────────
+limiter = Limiter(key_func=get_remote_address, default_limits=["100/minute"])
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
 # ── CORS — allow all origins for development; tighten in production. ───
 app.add_middleware(
     CORSMiddleware,
@@ -95,6 +105,7 @@ app.add_middleware(
 app.include_router(air_router)
 app.include_router(noise_router)
 app.include_router(sound_router)
+app.include_router(analytics_router)
 
 
 # ── Health check ────────────────────────────────────────────────────────
